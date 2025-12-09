@@ -1,1 +1,0 @@
-web: gunicorn cafe_terrain.wsgi

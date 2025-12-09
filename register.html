@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Register - CafeTerrain Attendance</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌳</text></svg>">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #2d5016 0%, #4a7c2c 100%);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    body::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: repeating-linear-gradient(
+        45deg,
+        transparent,
+        transparent 10px,
+        rgba(255, 255, 255, 0.03) 10px,
+        rgba(255, 255, 255, 0.03) 20px
+      );
+      animation: backgroundMove 20s linear infinite;
+    }
+
+    @keyframes backgroundMove {
+      0% { transform: translate(0, 0); }
+      100% { transform: translate(50px, 50px); }
+    }
+
+    .register-container {
+      background: white;
+      border-radius: 20px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+      width: 100%;
+      max-width: 500px;
+      padding: 50px 40px;
+      position: relative;
+      z-index: 1;
+      animation: slideIn 0.6s ease-out;
+      max-height: 95vh;
+      overflow-y: auto;
+    }
+
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateY(-50px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .back-btn {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      background: #f8f9fa;
+      color: #2d5016;
+      padding: 8px 15px;
+      border-radius: 20px;
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 600;
+      transition: all 0.3s;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .back-btn:hover {
+      background: #2d5016;
+      color: white;
+      transform: translateX(-5px);
+    }
+
+    .logo {
+      text-align: center;
+      margin-bottom: 35px;
+      margin-top: 30px;
+    }
+
+    .logo-icon {
+      font-size: 60px;
+      margin-bottom: 10px;
+      display: inline-block;
+    }
+
+    .logo h1 {
+      color: #2d5016;
+      font-size: 32px;
+      margin-bottom: 5px;
+      font-weight: 700;
+    }
+
+    .logo p {
+      color: #666;
+      font-size: 14px;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+      position: relative;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 8px;
+      color: #333;
+      font-weight: 600;
+      font-size: 14px;
+    }
+
+    label .required {
+      color: #dc3545;
+    }
+
+    .input-wrapper {
+      position: relative;
+    }
+
+    .input-icon {
+      position: absolute;
+      left: 15px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 18px;
+      color: #666;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 13px 15px 13px 45px;
+      border: 2px solid #e0e0e0;
+      border-radius: 10px;
+      font-size: 14px;
+      transition: all 0.3s;
+      background: #f8f9fa;
+    }
+
+    input:focus, select:focus {
+      outline: none;
+      border-color: #2d5016;
+      background: white;
+      box-shadow: 0 0 0 4px rgba(45, 80, 22, 0.1);
+    }
+
+    input::placeholder {
+      color: #aaa;
+    }
+
+    .password-toggle {
+      position: absolute;
+      right: 15px;
+      top: 50%;
+      transform: translateY(-50%);
+      cursor: pointer;
+      font-size: 18px;
+      color: #666;
+      user-select: none;
+    }
+
+    .password-toggle:hover {
+      color: #2d5016;
+    }
+
+    .password-strength {
+      margin-top: 8px;
+      height: 4px;
+      background: #e0e0e0;
+      border-radius: 2px;
+      overflow: hidden;
+    }
+
+    .password-strength-bar {
+      height: 100%;
+      width: 0%;
+      transition: all 0.3s;
+    }
+
+    .password-strength-bar.weak {
+      width: 33%;
+      background: #dc3545;
+    }
+
+    .password-strength-bar.medium {
+      width: 66%;
+      background: #ffc107;
+    }
+
+    .password-strength-bar.strong {
+      width: 100%;
+      background: #28a745;
+    }
+
+    .password-hint {
+      font-size: 12px;
+      color: #666;
+      margin-top: 5px;
+    }
+
+    .btn {
+      width: 100%;
+      padding: 16px;
+      background: linear-gradient(135deg, #2d5016, #4a7c2c);
+      color: white;
+      border: none;
+      border-radius: 10px;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.3s;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-top: 10px;
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(45, 80, 22, 0.4);
+    }
+
+    .btn:active {
+      transform: translateY(0);
+    }
+
+    .btn:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .message {
+      padding: 12px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      display: none;
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    .message.success {
+      background: #d4edda;
+      color: #155724;
+      border: 1px solid #c3e6cb;
+    }
+
+    .message.error {
+      background: #f8d7da;
+      color: #721c24;
+      border: 1px solid #f5c6cb;
+    }
+
+    .login-link {
+      text-align: center;
+      margin-top: 20px;
+      color: #666;
+      font-size: 14px;
+    }
+
+    .login-link a {
+      color: #2d5016;
+      text-decoration: none;
+      font-weight: 700;
+    }
+
+    .login-link a:hover {
+      text-decoration: underline;
+    }
+
+    .terms {
+      font-size: 12px;
+      color: #666;
+      margin-top: 15px;
+      text-align: center;
+      line-height: 1.5;
+    }
+
+    .terms a {
+      color: #2d5016;
+      text-decoration: none;
+    }
+
+    .terms a:hover {
+      text-decoration: underline;
+    }
+
+    #loading {
+      display: none;
+      text-align: center;
+      margin-top: 15px;
+    }
+
+    .spinner {
+      border: 3px solid #f3f3f3;
+      border-top: 3px solid #2d5016;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 10px;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .loading-text {
+      color: #666;
+      font-size: 14px;
+    }
+
+    @media (max-width: 480px) {
+      .register-container {
+        padding: 40px 25px;
+      }
+
+      .logo h1 {
+        font-size: 26px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="register-container">
+    <a href="login.html" class="back-btn">← Back to Login</a>
+
+    <div class="logo">
+      <div class="logo-icon">🌳</div>
+      <h1>Create Account</h1>
+      <p>Join CafeTerrain Attendance System</p>
+    </div>
+
+    <div id="message" class="message"></div>
+
+    <form id="registerForm">
+      <div class="form-group">
+        <label for="fullName">Full Name <span class="required">*</span></label>
+        <div class="input-wrapper">
+          <span class="input-icon">👤</span>
+          <input 
+            type="text" 
+            id="fullName" 
+            required 
+            placeholder="Enter your full name"
+            autocomplete="name"
+          >
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="email">Email Address <span class="required">*</span></label>
+        <div class="input-wrapper">
+          <span class="input-icon">📧</span>
+          <input 
+            type="email" 
+            id="email" 
+            required 
+            placeholder="Enter your email"
+            autocomplete="email"
+          >
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="phone">Phone Number</label>
+        <div class="input-wrapper">
+          <span class="input-icon">📱</span>
+          <input 
+            type="tel" 
+            id="phone" 
+            placeholder="Enter your phone number"
+            autocomplete="tel"
+          >
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="role">Role <span class="required">*</span></label>
+        <div class="input-wrapper">
+          <span class="input-icon">💼</span>
+          <select id="role" required>
+            <option value="">-- Select Role --</option>
+            <option value="User">User</option>
+            <option value="Manager">Manager</option>
+            <option value="Staff">Staff</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="password">Password <span class="required">*</span></label>
+        <div class="input-wrapper">
+          <span class="input-icon">🔒</span>
+          <input 
+            type="password" 
+            id="password" 
+            required 
+            placeholder="Create a strong password"
+            autocomplete="new-password"
+            minlength="6"
+          >
+          <span class="password-toggle" onclick="togglePassword('password')">👁️</span>
+        </div>
+        <div class="password-strength">
+          <div class="password-strength-bar" id="strengthBar"></div>
+        </div>
+        <p class="password-hint">Minimum 6 characters required</p>
+      </div>
+
+      <div class="form-group">
+        <label for="confirmPassword">Confirm Password <span class="required">*</span></label>
+        <div class="input-wrapper">
+          <span class="input-icon">🔒</span>
+          <input 
+            type="password" 
+            id="confirmPassword" 
+            required 
+            placeholder="Re-enter your password"
+            autocomplete="new-password"
+            minlength="6"
+          >
+          <span class="password-toggle" onclick="togglePassword('confirmPassword')">👁️</span>
+        </div>
+      </div>
+
+      <button type="submit" class="btn" id="registerBtn">Create Account</button>
+    </form>
+
+    <div id="loading">
+      <div class="spinner"></div>
+      <p class="loading-text">Creating account...</p>
+    </div>
+
+    <div class="terms">
+      By creating an account, you agree to our <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>
+    </div>
+
+    <div class="login-link">
+      Already have an account? <a href="login.html">Login here</a>
+    </div>
+  </div>
+
+  <script src="js/config.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/common.js"></script>
+  <script>
+    function togglePassword(fieldId) {
+      const input = document.getElementById(fieldId);
+      const toggle = input.nextElementSibling;
+      
+      if (input.type === 'password') {
+        input.type = 'text';
+        toggle.textContent = '🙈';
+      } else {
+        input.type = 'password';
+        toggle.textContent = '👁️';
+      }
+    }
+
+    function showMessage(msg, type) {
+      const messageDiv = document.getElementById('message');
+      if (msg) {
+        messageDiv.textContent = msg;
+        messageDiv.className = 'message ' + type;
+        messageDiv.style.display = 'block';
+        messageDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      } else {
+        messageDiv.style.display = 'none';
+      }
+    }
+
+    function showLoading(show) {
+      document.getElementById('loading').style.display = show ? 'block' : 'none';
+      document.getElementById('registerBtn').disabled = show;
+      document.getElementById('registerForm').style.display = show ? 'none' : 'block';
+    }
+
+    // Password strength checker
+    document.getElementById('password').addEventListener('input', function() {
+      const password = this.value;
+      const strengthBar = document.getElementById('strengthBar');
+      
+      if (password.length === 0) {
+        strengthBar.className = 'password-strength-bar';
+        return;
+      }
+      
+      let strength = 0;
+      if (password.length >= 6) strength++;
+      if (password.length >= 10) strength++;
+      if (/[a-z]/.test(password) && /[A-Z]/.test(password)) strength++;
+      if (/\d/.test(password)) strength++;
+      if (/[^a-zA-Z\d]/.test(password)) strength++;
+      
+      if (strength <= 2) {
+        strengthBar.className = 'password-strength-bar weak';
+      } else if (strength <= 4) {
+        strengthBar.className = 'password-strength-bar medium';
+      } else {
+        strengthBar.className = 'password-strength-bar strong';
+      }
+    });
+
+    document.getElementById('registerForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const fullName = document.getElementById('fullName').value.trim();
+      const email = document.getElementById('email').value.trim();
+      const phone = document.getElementById('phone').value.trim();
+      const role = document.getElementById('role').value;
+      const password = document.getElementById('password').value;
+      const confirmPassword = document.getElementById('confirmPassword').value;
+      
+      // Validation
+      if (!fullName || !email || !role || !password) {
+        showMessage('❌ Please fill in all required fields', 'error');
+        return;
+      }
+
+      if (password.length < 6) {
+        showMessage('❌ Password must be at least 6 characters', 'error');
+        return;
+      }
+
+      if (password !== confirmPassword) {
+        showMessage('❌ Passwords do not match', 'error');
+        return;
+      }
+
+      if (!email.includes('@')) {
+        showMessage('❌ Please enter a valid email address', 'error');
+        return;
+      }
+      
+      showMessage('', '');
+      showLoading(true);
+
+      try {
+        const result = await register(email, password);
+        
+        showLoading(false);
+        
+        if (result.success) {
+          showMessage('✅ Account created successfully! Redirecting to login...', 'success');
+          setTimeout(() => {
+            window.location.href = 'login.html?email=' + encodeURIComponent(email);
+          }, 2000);
+        } else {
+          showMessage('❌ ' + (result.error || 'Registration failed. Email may already exist.'), 'error');
+        }
+      } catch (error) {
+        showLoading(false);
+        showMessage('❌ Connection error: ' + error.message, 'error');
+      }
+    });
+
+    // Pre-fill email from URL if redirected from login
+    window.onload = function() {
+      const urlParams = new URLSearchParams(window.location.search);
+      const email = urlParams.get('email');
+      if (email) {
+        document.getElementById('email').value = email;
+      }
+
+      // Check if already logged in
+      const user = getCurrentUser();
+      if (user) {
+        showMessage('ℹ️ Already logged in. Redirecting...', 'success');
+        setTimeout(() => {
+          window.location.href = 'dashboard.html';
+        }, 1000);
+      }
+    };
+  </script>
+</body>
+</html>

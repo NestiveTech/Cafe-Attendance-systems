@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Leaves - CafeTerrain</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .leave-card {
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      margin-bottom: 15px;
+      border-left: 4px solid #2d5016;
+    }
+    .leave-card.pending { border-left-color: #ffc107; }
+    .leave-card.approved { border-left-color: #28a745; }
+    .leave-card.rejected { border-left-color: #dc3545; }
+    .leave-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 15px;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .leave-header h3 {
+      color: #2d5016;
+      margin: 0;
+    }
+    .leave-details {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
+      margin-bottom: 15px;
+    }
+    .leave-detail-item {
+      display: flex;
+      flex-direction: column;
+    }
+    .leave-detail-label {
+      font-size: 12px;
+      color: #666;
+      margin-bottom: 4px;
+    }
+    .leave-detail-value {
+      font-weight: 600;
+      color: #333;
+    }
+    .leave-reason {
+      background: #f8f9fa;
+      padding: 12px;
+      border-radius: 6px;
+      margin-bottom: 15px;
+      font-style: italic;
+      color: #555;
+    }
+    .leave-actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .filter-section {
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      margin-bottom: 20px;
+      display: flex;
+      gap: 15px;
+      flex-wrap: wrap;
+      align-items: end;
+    }
+    .filter-group {
+      flex: 1;
+      min-width: 200px;
+    }
+    .stats-summary {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+    .summary-card {
+      background: white;
+      padding: 15px;
+      border-radius: 8px;
+      text-align: center;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    .summary-count {
+      font-size: 28px;
+      font-weight: bold;
+      color: #2d5016;
+    }
+    .summary-label {
+      font-size: 13px;
+      color: #666;
+      margin-top: 5px;
+    }
+  </style>
+</head>
+<body>
+  <div id="navigation"></div>
+
+  <div class="container">
+    <div class="page-header">
+      <div>
+        <h1>🏖️ Leave Management</h1>
+        <p>Manage employee leave requests</p>
+      </div>
+      <button class="btn btn-primary" onclick="showApplyLeaveModal()">+ Apply Leave</button>
+    </div>
+
+    <div class="stats-summary">
+      <div class="summary-card">
+        <div class="summary-count" id="totalLeaves">0</div>
+        <div class="summary-label">Total Requests</div>
+      </div>
+      <div class="summary-card">
+        <div class="summary-count" style="color: #ffc107;" id="pendingLeaves">0</div>
+        <div class="summary-label">Pending</div>
+      </div>
+      <div class="summary-card">
+        <div class="summary-count" style="color: #28a745;" id="approvedLeaves">0</div>
+        <div class="summary-label">Approved</div>
+      </div>
+      <div class="summary-card">
+        <div class="summary-count" style="color: #dc3545;" id="rejectedLeaves">0</div>
+        <div class="summary-label">Rejected</div>
+      </div>
+    </div>
+
+    <div class="filter-section">
+      <div class="filter-group">
+        <label>Filter by Status</label>
+        <select id="statusFilter" onchange="applyFilters()">
+          <option value="All">All</option>
+          <option value="Pending">Pending</option>
+          <option value="Approved">Approved</option>
+          <option value="Rejected">Rejected</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label>Filter by Employee</label>
+        <select id="employeeFilter" onchange="applyFilters()">
+          <option value="All">All Employees</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label>Leave Type</label>
+        <select id="typeFilter" onchange="applyFilters()">
+          <option value="All">All Types</option>
+          <option value="Casual">Casual Leave</option>
+          <option value="Sick">Sick Leave</option>
+          <option value="Emergency">Emergency Leave</option>
+          <option value="Annual">Annual Leave</option>
+        </select>
+      </div>
+    </div>
+
+    <div id="leavesList">
+      <p style="text-align:center; padding: 40px;">Loading leave requests...</p>
+    </div>
+  </div>
+
+  <!-- Apply Leave Modal -->
+  <div id="applyLeaveModal" class="modal">
+    <div class="modal-content">
+      <span class="close" onclick="closeApplyLeaveModal()">&times;</span>
+      <h2>Apply for Leave</h2>
+      <form id="applyLeaveForm">
+        <div class="form-group">
+          <label>Select Employee *</label>
+          <select id="leaveEmpId" required>
+            <option value="">-- Select Employee --</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Leave Type *</label>
+          <select id="leaveType" required>
+            <option value="Casual">Casual Leave</option>
+            <option value="Sick">Sick Leave</option>
+            <option value="Emergency">Emergency Leave</option>
+            <option value="Annual">Annual Leave</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Start Date *</label>
+          <input type="date" id="leaveStartDate" required>
+        </div>
+        <div class="form-group">
+          <label>End Date *</label>
+          <input type="date" id="leaveEndDate" required>
+        </div>
+        <div class="form-group">
+          <label>Reason *</label>
+          <textarea id="leaveReason" rows="4" required placeholder="Please provide reason for leave request"></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary">Submit Leave Request</button>
+      </form>
+    </div>
+  </div>
+
+  <script src="js/config.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/common.js"></script>
+  <script>
+    let allLeaves = [];
+    let allEmployees = [];
+
+    window.onload = function() {
+      checkAuth();
+      insertNavigation('leaves');
+      loadEmployees();
+      loadLeaves();
+    };
+
+    async function loadEmployees() {
+      const result = await API.post('getEmployees');
+      
+      if (result.success) {
+        allEmployees = result.data.filter(e => e.Status === 'Active');
+        populateEmployeeFilters();
+      }
+    }
+
+    function populateEmployeeFilters() {
+      const leaveEmpSelect = document.getElementById('leaveEmpId');
+      const filterSelect = document.getElementById('employeeFilter');
+      
+      allEmployees.forEach(emp => {
+        leaveEmpSelect.innerHTML += `<option value="${emp.ID}">${emp.Name} (${emp.ID})</option>`;
+        filterSelect.innerHTML += `<option value="${emp.ID}">${emp.Name}</option>`;
+      });
+    }
+
+    async function loadLeaves() {
+      const result = await API.post('getLeaves');
+      
+      if (result.success) {
+        allLeaves = result.data;
+        updateStats();
+        applyFilters();
+      } else {
+        showError('Failed to load leaves');
+      }
+    }
+
+    function updateStats() {
+      document.getElementById('totalLeaves').textContent = allLeaves.length;
+      document.getElementById('pendingLeaves').textContent = allLeaves.filter(l => l.Status === 'Pending').length;
+      document.getElementById('approvedLeaves').textContent = allLeaves.filter(l => l.Status === 'Approved').length;
+      document.getElementById('rejectedLeaves').textContent = allLeaves.filter(l => l.Status === 'Rejected').length;
+    }
+
+    function applyFilters() {
+      const statusFilter = document.getElementById('statusFilter').value;
+      const employeeFilter = document.getElementById('employeeFilter').value;
+      const typeFilter = document.getElementById('typeFilter').value;
+
+      let filtered = allLeaves;
+
+      if (statusFilter !== 'All') {
+        filtered = filtered.filter(l => l.Status === statusFilter);
+      }
+      if (employeeFilter !== 'All') {
+        filtered = filtered.filter(l => l.Emp_ID === employeeFilter);
+      }
+      if (typeFilter !== 'All') {
+        filtered = filtered.filter(l => l.Leave_Type === typeFilter);
+      }
+
+      renderLeaves(filtered);
+    }
+
+    function renderLeaves(leaves) {
+      const container = document.getElementById('leavesList');
+      
+      if (leaves.length === 0) {
+        container.innerHTML = '<p style="text-align:center; padding: 40px; color: #666;">No leave requests found</p>';
+        return;
+      }
+
+      const user = getCurrentUser();
+      const canApprove = user && (user.role === 'Admin' || user.role === 'Manager');
+
+      container.innerHTML = leaves.map(leave => {
+        const statusClass = leave.Status.toLowerCase();
+        
+        let actionButtons = '';
+        if (leave.Status === 'Pending' && canApprove) {
+          actionButtons = `
+            <div class="leave-actions">
+              <button class="btn btn-success btn-sm" onclick="updateLeaveStatus(${leave.rowIndex}, 'Approved')">✓ Approve</button>
+              <button class="btn btn-danger btn-sm" onclick="updateLeaveStatus(${leave.rowIndex}, 'Rejected')">✗ Reject</button>
+            </div>
+          `;
+        }
+
+        return `
+          <div class="leave-card ${statusClass}">
+            <div class="leave-header">
+              <h3>${leave.Name} (${leave.Emp_ID})</h3>
+              <span class="badge badge-${statusClass}">${leave.Status}</span>
+            </div>
+            <div class="leave-details">
+              <div class="leave-detail-item">
+                <span class="leave-detail-label">Leave Type</span>
+                <span class="leave-detail-value">${leave.Leave_Type}</span>
+              </div>
+              <div class="leave-detail-item">
+                <span class="leave-detail-label">Start Date</span>
+                <span class="leave-detail-value">${leave.Start_Date}</span>
+              </div>
+              <div class="leave-detail-item">
+                <span class="leave-detail-label">End Date</span>
+                <span class="leave-detail-value">${leave.End_Date}</span>
+              </div>
+              <div class="leave-detail-item">
+                <span class="leave-detail-label">Applied On</span>
+                <span class="leave-detail-value">${leave.Applied_On}</span>
+              </div>
+            </div>
+            <div class="leave-reason">
+              <strong>Reason:</strong> ${leave.Reason}
+            </div>
+            ${actionButtons}
+          </div>
+        `;
+      }).join('');
+    }
+
+    function showApplyLeaveModal() {
+      document.getElementById('applyLeaveForm').reset();
+      const today = new Date().toISOString().split('T')[0];
+      document.getElementById('leaveStartDate').setAttribute('min', today);
+      document.getElementById('leaveEndDate').setAttribute('min', today);
+      document.getElementById('applyLeaveModal').style.display = 'block';
+    }
+
+    function closeApplyLeaveModal() {
+      document.getElementById('applyLeaveModal').style.display = 'none';
+    }
+
+    document.getElementById('applyLeaveForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const startDate = new Date(document.getElementById('leaveStartDate').value);
+      const endDate = new Date(document.getElementById('leaveEndDate').value);
+
+      if (endDate < startDate) {
+        showError('End date cannot be before start date');
+        return;
+      }
+
+      const data = {
+        emp_id: document.getElementById('leaveEmpId').value,
+        leave_type: document.getElementById('leaveType').value,
+        start_date: document.getElementById('leaveStartDate').value,
+        end_date: document.getElementById('leaveEndDate').value,
+        reason: document.getElementById('leaveReason').value
+      };
+
+      const result = await API.post('applyLeave', { data });
+      
+      if (result.success) {
+        showSuccess(result.message);
+        closeApplyLeaveModal();
+        loadLeaves();
+      } else {
+        showError(result.error);
+      }
+    });
+
+    async function updateLeaveStatus(rowIndex, status) {
+      const confirmMsg = status === 'Approved' 
+        ? 'Are you sure you want to approve this leave request?' 
+        : 'Are you sure you want to reject this leave request?';
+      
+      if (!confirm(confirmMsg)) return;
+
+      const result = await API.post('updateLeaveStatus', { rowIndex, status });
+      
+      if (result.success) {
+        showSuccess(result.message);
+        loadLeaves();
+      } else {
+        showError(result.error);
+      }
+    }
+
+    // Auto refresh every 2 minutes
+    setInterval(loadLeaves, 120000);
+  </script>
+</body>
+</html>

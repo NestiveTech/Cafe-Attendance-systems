@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard - CafeTerrain</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .info-box {
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      margin-top: 20px;
+    }
+    .info-box p {
+      margin-bottom: 10px;
+      font-size: 16px;
+    }
+    .info-box strong {
+      color: #2d5016;
+    }
+  </style>
+</head>
+<body>
+  <div id="navigation"></div>
+
+  <div class="container">
+    <div class="page-header">
+      <div>
+        <h1>📊 Dashboard</h1>
+        <p>Welcome to CafeTerrain Attendance System</p>
+      </div>
+      <button class="btn btn-primary" onclick="location.reload()">🔄 Refresh</button>
+    </div>
+
+    <div class="stats-grid" id="statsGrid">
+      <div class="stat-card">
+        <div class="stat-icon">👥</div>
+        <div class="stat-value" id="totalEmp">-</div>
+        <div class="stat-label">Total Employees</div>
+      </div>
+      <div class="stat-card success">
+        <div class="stat-icon">✅</div>
+        <div class="stat-value" id="present">-</div>
+        <div class="stat-label">Present Today</div>
+      </div>
+      <div class="stat-card warning">
+        <div class="stat-icon">⏰</div>
+        <div class="stat-value" id="late">-</div>
+        <div class="stat-label">Late Arrivals</div>
+      </div>
+      <div class="stat-card danger">
+        <div class="stat-icon">❌</div>
+        <div class="stat-value" id="absent">-</div>
+        <div class="stat-label">Absent</div>
+      </div>
+    </div>
+
+    <div class="info-box">
+      <p><strong>🕐 Current Late Threshold:</strong> <span id="threshold">-</span></p>
+      <p><strong>🔄 Last Updated:</strong> <span id="lastUpdate">-</span></p>
+      <p><strong>📅 Today:</strong> <span id="todayDate">-</span></p>
+    </div>
+  </div>
+
+  <script src="js/config.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/common.js"></script>
+  <script>
+    window.onload = function() {
+      checkAuth();
+      insertNavigation('dashboard');
+      loadDashboardData();
+      displayTodayDate();
+    };
+
+    function displayTodayDate() {
+      const today = new Date();
+      const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+      document.getElementById('todayDate').textContent = today.toLocaleDateString('en-IN', options);
+    }
+
+    async function loadDashboardData() {
+      const result = await API.post('getDashboardData');
+      
+      if (result.success) {
+        const stats = result.data;
+        document.getElementById('totalEmp').textContent = stats.total_emp;
+        document.getElementById('present').textContent = stats.present;
+        document.getElementById('late').textContent = stats.late;
+        document.getElementById('absent').textContent = stats.absent;
+        document.getElementById('threshold').textContent = stats.current_threshold;
+        document.getElementById('lastUpdate').textContent = new Date(stats.last_updated).toLocaleString();
+      } else {
+        showError('Failed to load dashboard data');
+      }
+    }
+
+    // Auto refresh every 30 seconds
+    setInterval(loadDashboardData, 30000);
+  </script>
+</body>
+</html>

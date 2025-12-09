@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Settings - CafeTerrain</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .settings-section {
+      background: white;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      margin-bottom: 25px;
+    }
+    .settings-section h2 {
+      color: #2d5016;
+      margin-bottom: 20px;
+      font-size: 20px;
+      border-bottom: 2px solid #e0e0e0;
+      padding-bottom: 10px;
+    }
+    .setting-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px 0;
+      border-bottom: 1px solid #f0f0f0;
+      flex-wrap: wrap;
+      gap: 15px;
+    }
+    .setting-item:last-child {
+      border-bottom: none;
+    }
+    .setting-info {
+      flex: 1;
+      min-width: 250px;
+    }
+    .setting-info h3 {
+      margin: 0 0 8px 0;
+      color: #333;
+      font-size: 16px;
+      font-weight: 600;
+    }
+    .setting-info p {
+      margin: 0;
+      color: #666;
+      font-size: 14px;
+    }
+    .setting-control {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .time-input {
+      padding: 10px;
+      border: 2px solid #e0e0e0;
+      border-radius: 6px;
+      font-size: 16px;
+      min-width: 120px;
+    }
+    .system-info-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 20px;
+    }
+    .info-card {
+      background: #f8f9fa;
+      padding: 20px;
+      border-radius: 8px;
+      border-left: 4px solid #2d5016;
+    }
+    .info-card h4 {
+      color: #2d5016;
+      margin: 0 0 10px 0;
+      font-size: 14px;
+    }
+    .info-card p {
+      margin: 0;
+      color: #333;
+      font-size: 18px;
+      font-weight: 600;
+      word-break: break-all;
+    }
+    .danger-zone {
+      background: #fff5f5;
+      border: 2px solid #dc3545;
+      padding: 20px;
+      border-radius: 8px;
+      margin-top: 15px;
+    }
+    .danger-zone h3 {
+      color: #dc3545;
+      margin: 0 0 10px 0;
+    }
+    .cafe-info-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 12px 0;
+      border-bottom: 1px solid #f0f0f0;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .cafe-info-label {
+      color: #666;
+      font-weight: 500;
+    }
+    .cafe-info-value {
+      color: #333;
+      font-weight: 600;
+      text-align: right;
+    }
+    .quick-stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 15px;
+      margin-top: 20px;
+    }
+    .quick-stat-card {
+      background: linear-gradient(135deg, #2d5016, #4a7c2c);
+      color: white;
+      padding: 20px;
+      border-radius: 10px;
+      text-align: center;
+    }
+    .quick-stat-value {
+      font-size: 32px;
+      font-weight: bold;
+      margin-bottom: 5px;
+    }
+    .quick-stat-label {
+      font-size: 13px;
+      opacity: 0.9;
+    }
+    .config-code {
+      background: #f8f9fa;
+      padding: 15px;
+      border-radius: 8px;
+      border: 1px solid #e0e0e0;
+      font-family: 'Courier New', monospace;
+      font-size: 12px;
+      overflow-x: auto;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div id="navigation"></div>
+
+  <div class="container">
+    <div class="page-header">
+      <div>
+        <h1>⚙️ System Settings</h1>
+        <p>Configure and manage your attendance system</p>
+      </div>
+      <button class="btn btn-primary" onclick="location.reload()">🔄 Refresh</button>
+    </div>
+
+    <!-- Quick Stats -->
+    <div class="settings-section">
+      <h2>📊 Quick Statistics</h2>
+      <div class="quick-stats">
+        <div class="quick-stat-card">
+          <div class="quick-stat-value" id="totalEmployees">-</div>
+          <div class="quick-stat-label">Total Employees</div>
+        </div>
+        <div class="quick-stat-card">
+          <div class="quick-stat-value" id="activeEmployees">-</div>
+          <div class="quick-stat-label">Active Employees</div>
+        </div>
+        <div class="quick-stat-card">
+          <div class="quick-stat-value" id="todayPresent">-</div>
+          <div class="quick-stat-label">Present Today</div>
+        </div>
+        <div class="quick-stat-card">
+          <div class="quick-stat-value" id="pendingLeaves">-</div>
+          <div class="quick-stat-label">Pending Leaves</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Cafe Information -->
+    <div class="settings-section">
+      <h2>🏪 Cafe Information</h2>
+      <div class="cafe-info-item">
+        <span class="cafe-info-label">Cafe Name</span>
+        <span class="cafe-info-value" id="cafeName">-</span>
+      </div>
+      <div class="cafe-info-item">
+        <span class="cafe-info-label">Address</span>
+        <span class="cafe-info-value" id="cafeAddress">-</span>
+      </div>
+      <div class="cafe-info-item">
+        <span class="cafe-info-label">Phone</span>
+        <span class="cafe-info-value" id="cafePhone">-</span>
+      </div>
+      <div class="cafe-info-item">
+        <span class="cafe-info-label">Email</span>
+        <span class="cafe-info-value" id="cafeEmail">-</span>
+      </div>
+    </div>
+
+    <!-- Attendance Settings -->
+    <div class="settings-section">
+      <h2>⏰ Attendance Configuration</h2>
+      
+      <div class="setting-item">
+        <div class="setting-info">
+          <h3>Global Late Threshold</h3>
+          <p>Default time after which check-ins are marked as late</p>
+        </div>
+        <div class="setting-control">
+          <input type="time" id="lateThreshold" class="time-input" value="10:00">
+          <button class="btn btn-primary" onclick="updateThreshold()">💾 Update</button>
+        </div>
+      </div>
+
+      <div class="setting-item">
+        <div class="setting-info">
+          <h3>Auto Mark Absent</h3>
+          <p>Automatically mark employees absent at 6:00 PM if not checked in</p>
+        </div>
+        <div class="setting-control">
+          <span class="badge badge-success">✓ Enabled (18:00 IST)</span>
+        </div>
+      </div>
+
+      <div class="setting-item">
+        <div class="setting-info">
+          <h3>Daily Reminders</h3>
+          <p>Send attendance reminder emails to admin at 9:00 AM daily</p>
+        </div>
+        <div class="setting-control">
+          <span class="badge badge-success">✓ Enabled (09:00 IST)</span>
+        </div>
+      </div>
+
+      <div class="setting-item">
+        <div class="setting-info">
+          <h3>Time Zone</h3>
+          <p>System timezone for all timestamps</p>
+        </div>
+        <div class="setting-control">
+          <span class="badge badge-secondary" id="timeZone">-</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- System Information -->
+    <div class="settings-section">
+      <h2>📊 System Information</h2>
+      <div class="system-info-grid">
+        <div class="info-card">
+          <h4>System Version</h4>
+          <p>v1.0 Production</p>
+        </div>
+        <div class="info-card">
+          <h4>Current Time</h4>
+          <p id="currentTime">-</p>
+        </div>
+        <div class="info-card">
+          <h4>Time Zone</h4>
+          <p id="sysTimeZone">-</p>
+        </div>
+        <div class="info-card">
+          <h4>API Status</h4>
+          <p style="color: #28a745;">● Active</p>
+        </div>
+      </div>
+
+      <div class="config-code">
+        <strong>Web App URL:</strong><br>
+        <span id="webAppUrl">-</span>
+      </div>
+    </div>
+
+    <!-- Account Settings -->
+    <div class="settings-section">
+      <h2>👤 Account Management</h2>
+      
+      <div class="setting-item">
+        <div class="setting-info">
+          <h3>Logged In As</h3>
+          <p>Current user information</p>
+        </div>
+        <div class="setting-control">
+          <span id="userEmail" class="badge badge-primary">-</span>
+          <span id="userRole" class="badge badge-secondary">-</span>
+        </div>
+      </div>
+
+      <div class="setting-item">
+        <div class="setting-info">
+          <h3>Change Password</h3>
+          <p>Update your account password</p>
+        </div>
+        <div class="setting-control">
+          <button class="btn btn-primary" onclick="showChangePasswordModal()">🔐 Change Password</button>
+        </div>
+      </div>
+
+      <div class="setting-item">
+        <div class="setting-info">
+          <h3>Session Information</h3>
+          <p>View current login session details</p>
+        </div>
+        <div class="setting-control">
+          <button class="btn btn-primary" onclick="showSessionInfo()">ℹ️ View Details</button>
+        </div>
+      </div>
+
+      <div class="setting-item">
+        <div class="setting-info">
+          <h3>Register New User</h3>
+          <p>Create a new user account</p>
+        </div>
+        <div class="setting-control">
+          <button class="btn btn-primary" onclick="registerNewUser()">➕ Add User</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Data Management -->
+    <div class="settings-section">
+      <h2>💾 Data Management</h2>
+      
+      <div class="setting-item">
+        <div class="setting-info">
+          <h3>View Google Sheet</h3>
+          <p>Open the backend database</p>
+        </div>
+        <div class="setting-control">
+          <button class="btn btn-primary" onclick="openSpreadsheet()">📊 Open Sheet</button>
+        </div>
+      </div>
+
+      <div class="setting-item">
+        <div class="setting-info">
+          <h3>Clear Cache</h3>
+          <p>Refresh all system data</p>
+        </div>
+        <div class="setting-control">
+          <button class="btn btn-primary" onclick="clearSystemCache()">🗑️ Clear Cache</button>
+        </div>
+      </div>
+
+      <div class="setting-item">
+        <div class="setting-info">
+          <h3>Export Data</h3>
+          <p>Download attendance as CSV</p>
+        </div>
+        <div class="setting-control">
+          <button class="btn btn-primary" onclick="exportAllData()">📥 Export CSV</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Help & Documentation -->
+    <div class="settings-section">
+      <h2>📚 Help & Documentation</h2>
+      
+      <div class="setting-item">
+        <div class="setting-info">
+          <h3>System Documentation</h3>
+          <p>View complete user guide</p>
+        </div>
+        <div class="setting-control">
+          <button class="btn btn-primary" onclick="showDocumentation()">📖 View Docs</button>
+        </div>
+      </div>
+
+      <div class="setting-item">
+        <div class="setting-info">
+          <h3>API Endpoints</h3>
+          <p>View available API endpoints</p>
+        </div>
+        <div class="setting-control">
+          <button class="btn btn-primary" onclick="showAPIEndpoints()">🔌 API Info</button>
+        </div>
+      </div>
+
+      <div class="setting-item">
+        <div class="setting-info">
+          <h3>Contact Support</h3>
+          <p>Get help with system issues</p>
+        </div>
+        <div class="setting-control">
+          <a href="mailto:cafeterrainofficial@gmail.com" class="btn btn-primary">✉️ Email Support</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Danger Zone -->
+    <div class="settings-section">
+      <h2 style="color: #dc3545;">⚠️ Danger Zone</h2>
+      <div class="danger-zone">
+        <h3>⚙️ Initialize System</h3>
+        <p>Creates all required sheets with proper formatting.</p>
+        <p><strong>⚠️ Warning:</strong> Only run during initial setup.</p>
+        <button class="btn btn-danger" onclick="initializeSystem()">🔧 Initialize System</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Change Password Modal -->
+  <div id="passwordModal" class="modal">
+    <div class="modal-content">
+      <span class="close" onclick="closePasswordModal()">&times;</span>
+      <h2>🔐 Change Password</h2>
+      <form id="passwordForm">
+        <div class="form-group">
+          <label>Current Password *</label>
+          <input type="password" id="oldPassword" required>
+        </div>
+        <div class="form-group">
+          <label>New Password * (min 6 characters)</label>
+          <input type="password" id="newPassword" required minlength="6">
+        </div>
+        <div class="form-group">
+          <label>Confirm New Password *</label>
+          <input type="password" id="confirmPassword" required minlength="6">
+        </div>
+        <button type="submit" class="btn btn-primary">💾 Change Password</button>
+      </form>
+    </div>
+  </div>
+
+  <script src="js/config.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/common.js"></script>
+  <script>
+    window.onload = function() {
+      checkAuth();
+      insertNavigation('settings');
+      loadCurrentThreshold();
+      loadQuickStats();
+      loadSystemInfo();
+      updateCurrentTime();
+      displayUserInfo();
+      setInterval(updateCurrentTime, 1000);
+    };
+
+    function loadSystemInfo() {
+      document.getElementById('cafeName').textContent = CONFIG.CAFE_NAME;
+      document.getElementById('cafeAddress').textContent = CONFIG.CAFE_ADDRESS;
+      document.getElementById('cafePhone').textContent = CONFIG.CAFE_PHONE;
+      document.getElementById('cafeEmail').textContent = CONFIG.CAFE_EMAIL;
+      document.getElementById('timeZone').textContent = CONFIG.TIME_ZONE;
+      document.getElementById('sysTimeZone').textContent = CONFIG.TIME_ZONE;
+      document.getElementById('webAppUrl').textContent = CONFIG.API_URL;
+    }
+
+    function displayUserInfo() {
+      const user = getCurrentUser();
+      if (user) {
+        document.getElementById('userEmail').textContent = user.email || '-';
+        document.getElementById('userRole').textContent = user.role || 'User';
+      }
+    }
+
+    function updateCurrentTime() {
+      const now = new Date();
+      const timeStr = now.toLocaleTimeString('en-IN', { hour12: true });
+      document.getElementById('currentTime').textContent = timeStr;
+    }
+
+    async function loadCurrentThreshold() {
+      const result = await API.post('getLateThreshold');
+      
+      if (result.success) {
+        document.getElementById('lateThreshold').value = result.threshold;
+      }
+    }
+
+    async function loadQuickStats() {
+      const [empResult, dashResult, leaveResult] = await Promise.all([
+        API.post('getEmployees'),
+        API.post('getDashboardData'),
+        API.post('getLeaves')
+      ]);
+
+      if (empResult.success) {
+        const employees = empResult.data;
+        document.getElementById('totalEmployees').textContent = employees.length;
+        document.getElementById('activeEmployees').textContent = employees.filter(e => e.Status === 'Active').length;
+      }
+
+      if (dashResult.success) {
+        document.getElementById('todayPresent').textContent = dashResult.data.present;
+      }
+
+      if (leaveResult.success) {
+        document.getElementById('pendingLeaves').textContent = leaveResult.data.filter(l => l.Status === 'Pending').length;
+      }
+    }
+
+    async function updateThreshold() {
+      const time = document.getElementById('lateThreshold').value;
+      
+      if (!time) {
+        showError('Please select a time');
+        return;
+      }
+
+      const result = await API.post('updateLateThreshold', { time });
+      
+      if (result.success) {
+        showSuccess(result.message);
+      } else {
+        showError(result.error);
+      }
+    }
+
+    function showChangePasswordModal() {
+      document.getElementById('passwordForm').reset();
+      document.getElementById('passwordModal').style.display = 'block';
+    }
+
+    function closePasswordModal() {
+      document.getElementById('passwordModal').style.display = 'none';
+    }
+
+    document.getElementById('passwordForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const oldPassword = document.getElementById('oldPassword').value;
+      const newPassword = document.getElementById('newPassword').value;
+      const confirmPassword = document.getElementById('confirmPassword').value;
+
+      if (newPassword !== confirmPassword) {
+        showError('New passwords do not match');
+        return;
+      }
+
+      const user = getCurrentUser();
+      const result = await changeUserPassword(user.email, oldPassword, newPassword);
+      
+      if (result.success) {
+        showSuccess(result.message);
+        closePasswordModal();
+      } else {
+        showError(result.error);
+      }
+    });
+
+    function showSessionInfo() {
+      const user = getCurrentUser();
+      if (user) {
+        const loginTime = new Date(user.loginTime).toLocaleString('en-IN');
+        alert(`📋 Session Information:\n\n✉️ Email: ${user.email}\n👤 Role: ${user.role}\n🆔 Session ID: ${user.sessionId}\n⏰ Login Time: ${loginTime}\n🌍 Timezone: ${CONFIG.TIME_ZONE}`);
+      }
+    }
+
+    async function registerNewUser() {
+      const email = prompt('📧 Enter new user email:');
+      if (!email) return;
+      
+      const password = prompt('🔐 Enter password (min 6 characters):');
+      if (!password || password.length < 6) {
+        showError('Password must be at least 6 characters');
+        return;
+      }
+
+      const result = await register(email, password);
+      
+      if (result.success) {
+        showSuccess(result.message);
+      } else {
+        showError(result.error);
+      }
+    }
+
+    function openSpreadsheet() {
+      alert('📊 TO VIEW YOUR SPREADSHEET:\n\n1️⃣ Open Code.gs in Apps Script\n2️⃣ Check line 7 for SPREADSHEET_ID\n3️⃣ Open URL:\n   https://docs.google.com/spreadsheets/d/YOUR_ID/edit\n\n💡 Replace YOUR_ID with actual ID');
+    }
+
+    function clearSystemCache() {
+      if (confirm('Clear system cache? This will refresh all data.')) {
+        showSuccess('Cache cleared! Reloading...');
+        setTimeout(() => location.reload(), 1000);
+      }
+    }
+
+    async function exportAllData() {
+      const startDate = prompt('📅 Enter start date (YYYY-MM-DD):');
+      if (!startDate) return;
+      
+      const endDate = prompt('📅 Enter end date (YYYY-MM-DD):');
+      if (!endDate) return;
+
+      const result = await API.post('exportAttendanceCSV', { startDate, endDate });
+      
+      if (result.success) {
+        const blob = new Blob([result.data], { type: 'text/csv' });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `CafeTerrain_${startDate}_to_${endDate}.csv`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+        showSuccess(`Exported ${result.records} records`);
+      } else {
+        showError(result.error);
+      }
+    }
+
+    function initializeSystem() {
+      alert('📝 TO INITIALIZE SYSTEM:\n\n1️⃣ Open Apps Script Editor\n2️⃣ Select function: initializeSystem()\n3️⃣ Click Run ▶️\n4️⃣ Authorize permissions\n5️⃣ Check execution log\n\n✅ Creates all sheets with default admin account');
+    }
+
+    function showDocumentation() {
+      alert('📚 SYSTEM DOCUMENTATION\n\n🏠 Pages:\n• Index - Landing\n• Dashboard - Overview\n• Employees - Staff management\n• Attendance - Check IN/OUT\n• Leaves - Leave requests\n• Reports - Analytics\n• Settings - Configuration\n\n📊 4 Google Sheets:\n• Employees\n• Attendance\n• Leaves\n• Authentication\n\n🔐 Default Login:\nadmin@cafeterrain.com / admin123');
+    }
+
+    function showAPIEndpoints() {
+      alert('🔌 API ENDPOINTS\n\n📝 Actions:\n• login, register, changePassword\n• getDashboardData\n• getEmployees, addEmployee, updateEmployee, deleteEmployee\n• getMarkAttendanceData, markAttendance, getAttendance\n• getLeaves, applyLeave, updateLeaveStatus\n• getAnalytics, exportAttendanceCSV\n• getLateThreshold, updateLateThreshold\n• triggerDailyReport, triggerMonthlyReport');
+    }
+  </script>
+</body>
+</html>

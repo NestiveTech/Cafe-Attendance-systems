@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Reports - CafeTerrain</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .report-section {
+      background: white;
+      padding: 25px;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      margin-bottom: 25px;
+    }
+    .report-section h2 {
+      color: #2d5016;
+      margin-bottom: 20px;
+      font-size: 22px;
+    }
+    .date-range-picker {
+      display: flex;
+      gap: 15px;
+      flex-wrap: wrap;
+      align-items: end;
+      margin-bottom: 20px;
+    }
+    .date-group {
+      flex: 1;
+      min-width: 150px;
+    }
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 20px;
+      margin-bottom: 25px;
+    }
+    .metric-card {
+      background: linear-gradient(135deg, #2d5016 0%, #4a7c2c 100%);
+      color: white;
+      padding: 20px;
+      border-radius: 10px;
+      text-align: center;
+    }
+    .metric-value {
+      font-size: 36px;
+      font-weight: bold;
+      margin-bottom: 5px;
+    }
+    .metric-label {
+      font-size: 14px;
+      opacity: 0.9;
+    }
+    .employee-performance-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 15px;
+    }
+    .employee-performance-table th,
+    .employee-performance-table td {
+      padding: 12px;
+      text-align: left;
+      border-bottom: 1px solid #e0e0e0;
+    }
+    .employee-performance-table thead {
+      background: #f8f9fa;
+    }
+    .performance-bar {
+      width: 100%;
+      height: 8px;
+      background: #e0e0e0;
+      border-radius: 4px;
+      overflow: hidden;
+    }
+    .performance-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #28a745, #20c997);
+      transition: width 0.3s;
+    }
+    .quick-actions {
+      display: flex;
+      gap: 15px;
+      flex-wrap: wrap;
+    }
+    .export-btn {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 20px;
+      background: white;
+      border: 2px solid #2d5016;
+      color: #2d5016;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.3s;
+    }
+    .export-btn:hover {
+      background: #2d5016;
+      color: white;
+    }
+    .no-data {
+      text-align: center;
+      padding: 40px;
+      color: #666;
+    }
+  </style>
+</head>
+<body>
+  <div id="navigation"></div>
+
+  <div class="container">
+    <div class="page-header">
+      <div>
+        <h1>📊 Reports & Analytics</h1>
+        <p>Comprehensive attendance insights and performance metrics</p>
+      </div>
+    </div>
+
+    <div class="report-section">
+      <h2>📅 Select Date Range</h2>
+      <div class="date-range-picker">
+        <div class="date-group">
+          <label>Start Date</label>
+          <input type="date" id="startDate">
+        </div>
+        <div class="date-group">
+          <label>End Date</label>
+          <input type="date" id="endDate">
+        </div>
+        <button class="btn btn-primary" onclick="loadAnalytics()">Generate Report</button>
+        <button class="btn btn-primary" onclick="setThisMonth()">This Month</button>
+        <button class="btn btn-primary" onclick="setLastMonth()">Last Month</button>
+      </div>
+    </div>
+
+    <div class="report-section">
+      <h2>📈 Summary Metrics</h2>
+      <div class="metrics-grid">
+        <div class="metric-card">
+          <div class="metric-value" id="totalRecords">0</div>
+          <div class="metric-label">Total Records</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-value" id="totalPresent">0</div>
+          <div class="metric-label">Present Days</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-value" id="totalLate">0</div>
+          <div class="metric-label">Late Arrivals</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-value" id="totalAbsent">0</div>
+          <div class="metric-label">Absences</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-value" id="attendanceRate">0%</div>
+          <div class="metric-label">Attendance Rate</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="report-section">
+      <h2>👥 Employee Performance</h2>
+      <div id="performanceTable">
+        <p class="no-data">Select date range and click "Generate Report" to view performance metrics</p>
+      </div>
+    </div>
+
+    <div class="report-section">
+      <h2>⚡ Quick Actions</h2>
+      <div class="quick-actions">
+        <button class="export-btn" onclick="exportToCSV()">
+          <span>📥</span> Export to CSV
+        </button>
+        <button class="export-btn" onclick="generateDailyReport()">
+          <span>📄</span> Daily Report
+        </button>
+        <button class="export-btn" onclick="generateMonthlyReport()">
+          <span>📊</span> Monthly Report
+        </button>
+        <button class="export-btn" onclick="printReport()">
+          <span>🖨️</span> Print Report
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/config.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/common.js"></script>
+  <script>
+    let currentAnalytics = null;
+
+    window.onload = function() {
+      checkAuth();
+      insertNavigation('reports');
+      setThisMonth();
+      loadAnalytics();
+    };
+
+    function setThisMonth() {
+      const now = new Date();
+      const firstDay = new Date(now.getFullYear(), now.getMonth(), 1);
+      const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+      
+      document.getElementById('startDate').valueAsDate = firstDay;
+      document.getElementById('endDate').valueAsDate = lastDay;
+    }
+
+    function setLastMonth() {
+      const now = new Date();
+      const firstDay = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+      const lastDay = new Date(now.getFullYear(), now.getMonth(), 0);
+      
+      document.getElementById('startDate').valueAsDate = firstDay;
+      document.getElementById('endDate').valueAsDate = lastDay;
+    }
+
+    async function loadAnalytics() {
+      const startDate = document.getElementById('startDate').value;
+      const endDate = document.getElementById('endDate').value;
+
+      if (!startDate || !endDate) {
+        showError('Please select both start and end dates');
+        return;
+      }
+
+      if (new Date(endDate) < new Date(startDate)) {
+        showError('End date cannot be before start date');
+        return;
+      }
+
+      showLoading(true);
+      const result = await API.post('getAnalytics', { startDate, endDate });
+      showLoading(false);
+      
+      if (result.success) {
+        currentAnalytics = result.data;
+        renderAnalytics(result.data);
+      } else {
+        showError('Failed to load analytics');
+      }
+    }
+
+    function renderAnalytics(analytics) {
+      document.getElementById('totalRecords').textContent = analytics.summary.totalRecords;
+      document.getElementById('totalPresent').textContent = analytics.summary.totalPresent;
+      document.getElementById('totalLate').textContent = analytics.summary.totalLate;
+      document.getElementById('totalAbsent').textContent = analytics.summary.totalAbsent;
+      document.getElementById('attendanceRate').textContent = analytics.summary.attendanceRate + '%';
+
+      const performanceDiv = document.getElementById('performanceTable');
+      
+      if (analytics.empMetrics.length === 0) {
+        performanceDiv.innerHTML = '<p class="no-data">No data available for selected period</p>';
+        return;
+      }
+
+      let tableHTML = `
+        <table class="employee-performance-table">
+          <thead>
+            <tr>
+              <th>Employee</th>
+              <th>Role</th>
+              <th>Total Days</th>
+              <th>Present</th>
+              <th>Late</th>
+              <th>Absent</th>
+              <th>Avg In Time</th>
+              <th>Punctuality</th>
+            </tr>
+          </thead>
+          <tbody>
+      `;
+
+      analytics.empMetrics
+        .sort((a, b) => b.punctualityScore - a.punctualityScore)
+        .forEach(emp => {
+          tableHTML += `
+            <tr>
+              <td><strong>${emp.name}</strong><br><small>${emp.id}</small></td>
+              <td>${emp.role}</td>
+              <td>${emp.totalDays}</td>
+              <td><span style="color: #28a745;">${emp.presentDays}</span></td>
+              <td><span style="color: #ffc107;">${emp.lateDays}</span></td>
+              <td><span style="color: #dc3545;">${emp.absentDays}</span></td>
+              <td>${emp.avgInTime}</td>
+              <td>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                  <div class="performance-bar" style="width: 100px;">
+                    <div class="performance-fill" style="width: ${emp.punctualityScore}%;"></div>
+                  </div>
+                  <strong>${emp.punctualityScore}%</strong>
+                </div>
+              </td>
+            </tr>
+          `;
+        });
+
+      tableHTML += '</tbody></table>';
+      performanceDiv.innerHTML = tableHTML;
+    }
+
+    async function exportToCSV() {
+      const startDate = document.getElementById('startDate').value;
+      const endDate = document.getElementById('endDate').value;
+
+      if (!startDate || !endDate) {
+        showError('Please select date range first');
+        return;
+      }
+
+      const result = await API.post('exportAttendanceCSV', { startDate, endDate });
+      
+      if (result.success) {
+        const blob = new Blob([result.data], { type: 'text/csv' });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `CafeTerrain_Attendance_${startDate}_to_${endDate}.csv`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+        showSuccess(`Exported ${result.records} records to CSV`);
+      } else {
+        showError('Export failed: ' + result.error);
+      }
+    }
+
+    async function generateDailyReport() {
+      const result = await API.post('triggerDailyReport');
+      
+      if (result.success) {
+        showSuccess('Daily report generated successfully!');
+      } else {
+        showError('Failed to generate daily report');
+      }
+    }
+
+    async function generateMonthlyReport() {
+      const result = await API.post('triggerMonthlyReport');
+      
+      if (result.success) {
+        showSuccess('Monthly report generated successfully!');
+      } else {
+        showError('Failed to generate monthly report');
+      }
+    }
+
+    function printReport() {
+      window.print();
+    }
+  </script>
+</body>
+</html>

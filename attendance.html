@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Attendance - CafeTerrain</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .attendance-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 20px;
+    }
+    .attendance-card {
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    .emp-info h3 {
+      color: #2d5016;
+      margin-bottom: 5px;
+    }
+    .emp-info p {
+      color: #666;
+      font-size: 14px;
+      margin-bottom: 15px;
+    }
+    .attendance-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div id="navigation"></div>
+
+  <div class="container">
+    <div class="page-header">
+      <div>
+        <h1>✅ Mark Attendance</h1>
+        <p>Today: <strong id="todayDate">-</strong></p>
+      </div>
+      <button class="btn btn-primary" onclick="location.reload()">🔄 Refresh</button>
+    </div>
+
+    <div class="attendance-grid" id="attendanceGrid">
+      <p style="text-align:center; padding: 40px;">Loading attendance data...</p>
+    </div>
+  </div>
+
+  <script src="js/config.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/common.js"></script>
+  <script>
+    window.onload = function() {
+      checkAuth();
+      insertNavigation('attendance');
+      displayTodayDate();
+      loadAttendanceData();
+    };
+
+    function displayTodayDate() {
+      const today = new Date();
+      const options = { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' };
+      document.getElementById('todayDate').textContent = today.toLocaleDateString('en-IN', options);
+    }
+
+    async function loadAttendanceData() {
+      const result = await API.post('getMarkAttendanceData');
+      
+      if (result.success) {
+        renderAttendance(result.data);
+      } else {
+        showError('Failed to load attendance data');
+      }
+    }
+
+    function renderAttendance(employees) {
+      const grid = document.getElementById('attendanceGrid');
+      
+      if (employees.length === 0) {
+        grid.innerHTML = '<p style="text-align:center; padding: 40px; color: #666;">No active employees found</p>';
+        return;
+      }
+
+      grid.innerHTML = employees.map(emp => {
+        let statusHtml = '';
+        let actionHtml = '';
+
+        if (emp.status === 'NONE') {
+          statusHtml = '<span class="badge badge-secondary">Not Marked</span>';
+          actionHtml = `<button class="btn btn-success btn-sm" onclick="markAttendance('${emp.ID}', 'IN')">✓ Check IN</button>`;
+        } else if (emp.status === 'CHECKED_IN') {
+          statusHtml = `<span class="badge badge-warning">IN: ${emp.in_time}</span>`;
+          actionHtml = `<button class="btn btn-danger btn-sm" onclick="markAttendance('${emp.ID}', 'OUT')">✗ Check OUT</button>`;
+        } else {
+          statusHtml = `<span class="badge badge-success">IN: ${emp.in_time} | OUT: ${emp.out_time}</span>`;
+          actionHtml = '<span style="color: #28a745; font-weight: bold;">✓ Completed</span>';
+        }
+
+        return `
+          <div class="attendance-card">
+            <div class="emp-info">
+              <h3>${emp.Name}</h3>
+              <p><strong>ID:</strong> ${emp.ID} | <strong>Role:</strong> ${emp.Role}</p>
+            </div>
+            <div class="attendance-actions">
+              ${statusHtml}
+              ${actionHtml}
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    async function markAttendance(empId, action) {
+      const notes = action === 'OUT' ? prompt('Add notes (optional):') || '' : '';
+      
+      const result = await API.post('markAttendance', {
+        data: {
+          emp_id: empId,
+          action: action,
+          notes: notes
+        }
+      });
+      
+      if (result.success) {
+        showSuccess(result.message);
+        loadAttendanceData();
+      } else {
+        showError(result.error);
+      }
+    }
+
+    // Auto refresh every 60 seconds
+    setInterval(loadAttendanceData, 60000);
+  </script>
+</body>
+</html>

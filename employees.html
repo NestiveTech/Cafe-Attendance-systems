@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Employees - CafeTerrain</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .btn-icon {
+      background: none;
+      border: none;
+      font-size: 18px;
+      cursor: pointer;
+      padding: 5px;
+    }
+    .btn-icon:hover {
+      transform: scale(1.2);
+    }
+  </style>
+</head>
+<body>
+  <div id="navigation"></div>
+
+  <div class="container">
+    <div class="page-header">
+      <h1>👥 Employee Management</h1>
+      <button class="btn btn-primary" onclick="showAddModal()">+ Add Employee</button>
+    </div>
+
+    <div class="table-container">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Role</th>
+            <th>Email</th>
+            <th>Phone</th>
+            <th>Joined</th>
+            <th>Threshold</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="employeeTable">
+          <tr><td colspan="9" style="text-align:center;">Loading...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Employee Modal -->
+  <div id="employeeModal" class="modal">
+    <div class="modal-content">
+      <span class="close" onclick="closeModal()">&times;</span>
+      <h2 id="modalTitle">Add Employee</h2>
+      <form id="employeeForm">
+        <input type="hidden" id="rowIndex">
+        <div class="form-group">
+          <label>Employee ID</label>
+          <input type="text" id="empId" required>
+        </div>
+        <div class="form-group">
+          <label>Name *</label>
+          <input type="text" id="empName" required>
+        </div>
+        <div class="form-group">
+          <label>Role *</label>
+          <select id="empRole" required>
+            <option value="Staff">Staff</option>
+            <option value="Manager">Manager</option>
+            <option value="Chef">Chef</option>
+            <option value="Waiter">Waiter</option>
+            <option value="Cleaner">Cleaner</option>
+            <option value="Cashier">Cashier</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Email</label>
+          <input type="email" id="empEmail">
+        </div>
+        <div class="form-group">
+          <label>Phone</label>
+          <input type="tel" id="empPhone">
+        </div>
+        <div class="form-group">
+          <label>Joined Date</label>
+          <input type="date" id="empJoined" required>
+        </div>
+        <div class="form-group">
+          <label>Late Threshold</label>
+          <input type="time" id="empThreshold" value="10:00">
+        </div>
+        <div class="form-group">
+          <label>Status</label>
+          <select id="empStatus">
+            <option value="Active">Active</option>
+            <option value="Inactive">Inactive</option>
+          </select>
+        </div>
+        <button type="submit" class="btn btn-primary">Save Employee</button>
+      </form>
+    </div>
+  </div>
+
+  <script src="js/config.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/common.js"></script>
+  <script>
+    let employees = [];
+
+    window.onload = function() {
+      checkAuth();
+      insertNavigation('employees');
+      loadEmployees();
+    };
+
+    async function loadEmployees() {
+      const result = await API.post('getEmployees');
+      
+      if (result.success) {
+        employees = result.data;
+        renderEmployees();
+      } else {
+        showError('Failed to load employees');
+      }
+    }
+
+    function renderEmployees() {
+      const tbody = document.getElementById('employeeTable');
+      
+      if (employees.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;">No employees found</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = employees.map(emp => `
+        <tr>
+          <td>${emp.ID}</td>
+          <td><strong>${emp.Name}</strong></td>
+          <td>${emp.Role}</td>
+          <td>${emp.Email || '-'}</td>
+          <td>${emp.Phone || '-'}</td>
+          <td>${emp.Joined_Date}</td>
+          <td>${emp.Late_Threshold}</td>
+          <td><span class="badge badge-${emp.Status.toLowerCase()}">${emp.Status}</span></td>
+          <td>
+            <button class="btn-icon" onclick="editEmployee(${emp.rowIndex})" title="Edit">✏️</button>
+            <button class="btn-icon" onclick="deleteEmployee('${emp.ID}')" title="Deactivate">🗑️</button>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    function showAddModal() {
+      document.getElementById('modalTitle').textContent = 'Add Employee';
+      document.getElementById('employeeForm').reset();
+      document.getElementById('rowIndex').value = '';
+      document.getElementById('empId').value = 'EMP-' + Date.now().toString().slice(-9);
+      document.getElementById('empJoined').valueAsDate = new Date();
+      document.getElementById('employeeModal').style.display = 'block';
+    }
+
+    function editEmployee(rowIndex) {
+      const emp = employees.find(e => e.rowIndex === rowIndex);
+      if (!emp) return;
+
+      document.getElementById('modalTitle').textContent = 'Edit Employee';
+      document.getElementById('rowIndex').value = rowIndex;
+      document.getElementById('empId').value = emp.ID;
+      document.getElementById('empName').value = emp.Name;
+      document.getElementById('empRole').value = emp.Role;
+      document.getElementById('empEmail').value = emp.Email;
+      document.getElementById('empPhone').value = emp.Phone;
+      
+      // Convert DD/MM/YYYY to YYYY-MM-DD
+      const dateParts = emp.Joined_Date.split('/');
+      if (dateParts.length === 3) {
+        document.getElementById('empJoined').value = `${dateParts[2]}-${dateParts[1]}-${dateParts[0]}`;
+      }
+      
+      document.getElementById('empThreshold').value = emp.Late_Threshold;
+      document.getElementById('empStatus').value = emp.Status;
+      document.getElementById('employeeModal').style.display = 'block';
+    }
+
+    document.getElementById('employeeForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const rowIndex = document.getElementById('rowIndex').value;
+      const action = rowIndex ? 'updateEmployee' : 'addEmployee';
+      
+      const data = {
+        emp_id: document.getElementById('empId').value,
+        name: document.getElementById('empName').value,
+        role: document.getElementById('empRole').value,
+        email: document.getElementById('empEmail').value,
+        phone: document.getElementById('empPhone').value,
+        joined_date: document.getElementById('empJoined').value,
+        threshold_time: document.getElementById('empThreshold').value,
+        status: document.getElementById('empStatus').value
+      };
+
+      const payload = { data };
+      if (rowIndex) payload.rowIndex = parseInt(rowIndex);
+
+      const result = await API.post(action, payload);
+      
+      if (result.success) {
+        showSuccess(result.message);
+        closeModal();
+        loadEmployees();
+      } else {
+        showError(result.error);
+      }
+    });
+
+    async function deleteEmployee(empId) {
+      if (!confirm('Are you sure you want to deactivate this employee?')) return;
+
+      const result = await API.post('deleteEmployee', { empId });
+      
+      if (result.success) {
+        showSuccess(result.message);
+        loadEmployees();
+      } else {
+        showError(result.error);
+      }
+    }
+
+    function closeModal() {
+      document.getElementById('employeeModal').style.display = 'none';
+    }
+  </script>
+</body>
+</html>
