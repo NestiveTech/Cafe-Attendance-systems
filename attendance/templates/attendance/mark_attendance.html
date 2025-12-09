@@ -1,0 +1,81 @@
+{% extends 'attendance/base.html' %}
+{% block content %}
+    <h1>Mark Attendance</h1>
+    <div class="card" style="max-width:500px;">
+        <form method="POST">
+            {% csrf_token %}
+            <label>Select Staff:</label>
+            <select name="emp_id" id="staffSelect" onchange="updateButtons()">
+                {% for e in employees %}
+                <option value="{{ e.ID }}" data-status="{{ e.status }}">
+                    {{ e.Name }} 
+                    {% if e.status == 'CHECKED_IN' %}(Checked In)
+                    {% elif e.status == 'COMPLETED' %}(Done)
+                    {% endif %}
+                </option>
+                {% endfor %}
+            </select>
+            
+            <div style="display:flex; gap:10px; margin-top:15px;">
+                <button id="btnIn" name="action" value="IN" style="flex:1;">Check IN</button>
+                <button id="btnOut" name="action" value="OUT" style="flex:1; background:#D1624D;">Check OUT</button>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        function updateButtons() {
+            var select = document.getElementById('staffSelect');
+            var btnIn = document.getElementById('btnIn');
+            var btnOut = document.getElementById('btnOut');
+            
+            // Get the current selected option
+            var selectedOption = select.options[select.selectedIndex];
+            // Read the custom data-status attribute
+            var status = selectedOption.getAttribute('data-status');
+            
+            console.log("Selected Employee Status:", status);
+
+            // Reset Default Styles
+            btnIn.style.opacity = "1";
+            btnOut.style.opacity = "1";
+            btnIn.style.cursor = "pointer";
+            btnOut.style.cursor = "pointer";
+
+            if (status === 'NONE') {
+                // Not checked in yet: Enable IN, Disable OUT
+                btnIn.disabled = false;
+                btnOut.disabled = true;
+                
+                // Visual feedback for disabled button
+                btnOut.style.opacity = "0.5";
+                btnOut.style.cursor = "not-allowed";
+            } 
+            else if (status === 'CHECKED_IN') {
+                // Currently checked in: Disable IN, Enable OUT
+                btnIn.disabled = true;
+                btnOut.disabled = false;
+                
+                // Visual feedback
+                btnIn.style.opacity = "0.5";
+                btnIn.style.cursor = "not-allowed";
+            } 
+            else if (status === 'COMPLETED') {
+                // Finished for the day: Disable BOTH
+                btnIn.disabled = true;
+                btnOut.disabled = true;
+                
+                // Visual feedback
+                btnIn.style.opacity = "0.5";
+                btnOut.style.opacity = "0.5";
+                btnIn.style.cursor = "not-allowed";
+                btnOut.style.cursor = "not-allowed";
+            }
+        }
+
+        // Initialize button state on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            updateButtons();
+        });
+    </script>
+{% endblock %}

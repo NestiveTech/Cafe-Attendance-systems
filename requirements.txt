@@ -1,0 +1,10 @@
+django
+gunicorn
+whitenoise
+gspread
+google-auth
+google-auth-oauthlib
+google-api-python-client
+xhtml2pdf
+dj-database-url
+psycopg2-binary

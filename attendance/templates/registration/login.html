@@ -1,0 +1,16 @@
+{% extends 'attendance/base.html' %}
+{% block content %}
+<div class="card" style="max-width:800px; margin:50px auto; display:grid; grid-template-columns:1fr 1px 1fr; gap:30px;">
+    <div>
+        <h3>Admin Login</h3>
+        <form method="post">{% csrf_token %}{{ form.as_p }}<button style="width:100%;">Login</button></form>
+        <p><a href="{% url 'register' %}" style="color:#E2725B;">Create Account</a></p>
+    </div>
+    <div style="background:#ddd;"></div>
+    <div style="text-align:center;">
+        <h3>Google Login</h3>
+        <p>One-click Sign In & Connect.</p>
+        <a href="{% url 'google_login' %}"><button style="background:#4285F4; width:100%;">Sign in with Google</button></a>
+    </div>
+</div>
+{% endblock %}

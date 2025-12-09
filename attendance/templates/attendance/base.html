@@ -1,0 +1,27 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Cafe Terrain</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body>
+    {% if user.is_authenticated %}
+    <div class="sidebar">
+        <h2>☕ Cafe Terrain</h2>
+        <a href="{% url 'dashboard' %}">Dashboard</a>
+        <a href="{% url 'employees' %}">Employees</a>
+        <a href="{% url 'mark_attendance' %}">Mark Attendance</a>
+        <a href="{% url 'logout' %}" style="margin-top:auto;">Logout</a>
+    </div>
+    {% endif %}
+    <div class="content">
+        {% if messages %}
+            {% for m in messages %}
+                <div style="background:white; padding:15px; border-left:4px solid #E2725B; margin-bottom:20px;">{{ m }}</div>
+            {% endfor %}
+        {% endif %}
+        {% block content %}{% endblock %}
+    </div>
+</body>
+</html>
